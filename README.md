@@ -1,64 +1,68 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Teste D2P
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Etapas de Criação
 
-## About Laravel
+Primeiramente foram setadas as configurações de comunicação com o banco do arquivo **.env**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![Detalhe do arquivo .env](docs/images/env.png)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Criou-se então o arquivo de **migration** create_processos para definir a tabela de "Processos" na base de dados,
+como visto no detalhe do método up a seguir:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+[2022_05_26_011310_create_processos.php](database/migrations/2022_05_26_011310_create_processos.php)
 
-## Learning Laravel
+![Detalhe do arquivo de migration](docs/images/migration.png)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Logo em seguida criou-se a **model** Processo com alguns Acessors necessários para a exibição das datas, como visto a seguir:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+[Processo.php](app/Models/Processo.php)
 
-## Laravel Sponsors
+![Detalhe do arquivo de Model](docs/images/processo.png)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Os **repositories** foram alocados no diretório *app/Repositories*. **ProcessoRepository**, para fins de praticidade
+recebeu apenas o método necessário para se completar os requisitos do teste.
 
-### Premium Partners
+[ProcessoRepository.php](app/Repositories/ProcessoRepository.php)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+![Detalhe do arquivo de ProcessoRepository](docs/images/repository.png)
 
-## Contributing
+>Também foi criado um arquivo de repository utilizado para simularmos o retorno de um usuário logado
+>como pode ser visto em [UserRepository.php](app/Repositories/UserRepository.php)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Criou-se um arquivo de **view** simples apenas com uma *table bootstrap* para exibir as informações sobre os processos
+solicitados pelo cliente e também um campo para mensagens vindas do backend, como pode ser observado no arquivo a seguir. 
 
-## Code of Conduct
+[processos.blade.php](resources/views/processos.blade.php)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+![Detalhe do campo de mensagem](docs/images/session-message.png)
 
-## Security Vulnerabilities
+![Detalhe da iteração em processos](docs/images/view-processos.png)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Foi criado também um **controller** para os processos. Todas as ações realizadas no método responsável pela exibição 
+dos processos do usuário foram envolvidas por um bloco *try - catch* e os repositories injetados pelo *__construct*.
+Logo no início realizamos uma busca do usuário logado  e verificamos se corresponde ao código do cliente recebido via url.
+Essa verificação é feita para garantir que nenhum cliente acesse os processos de outro. Em seguida, busca-se os dados
+dos processos do cliente através do repository e retorna-se uma view com estes dados. Em caso de erro será exibida uma
+página padrão do laravel.
 
-## License
+[ProcessoController.php](app/Http/Controllers/ProcessoController.php)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+![Detalhe do controller](docs/images/controller.png)
+
+Por fim temos a rota criada para acesso do recurso. A rota foi colocada em um grupo de rotas para facilitar a criação de
+rotas futuras. Ela também foi nomeada possibilitar sua chamada dentro do controller.
+
+[Routes](routes/web.php)
+
+![Detalhe da rota](docs/images/route.png)
+
+## Sequência das possíveis visualizações do cliente
+
+#### Página de erro ao tentar acessar recurso de outro usuário
+![Detalhe da página de erro](docs/images/erro403.png)
+
+#### Página de erro inesperado
+![Detalhe da página de erro](docs/images/erro500.png)
+
+#### Página de exibição dos processos do cliente
+![Detalhe da página de erro](docs/images/pagina.png)
