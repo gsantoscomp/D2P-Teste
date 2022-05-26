@@ -17,5 +17,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () { return view('welcome'); });
 
 Route::prefix('clientes/{cliente}')->group(function() {
-    Route::get('processos', [ProcessoController::class, 'retornaProcessosAtivosPorUsuario']);
+    Route::get('processos', [ProcessoController::class, 'retornaProcessosAtivosPorUsuario'])->name('cliente.processos');
 });
